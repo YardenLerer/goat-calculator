@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -15,7 +15,7 @@ const port = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Static files (כולל index.html)
+// Static files
 app.use(express.static(__dirname));
 
 // JSON body parser
@@ -45,23 +45,20 @@ app.post('/analyze', async (req, res) => {
 תן לי תובנות חכמות ואסטרטגיות ללקוח שמתלבט אם להשקיע בקמפיין כזה, כולל המלצות לשיפור, אזהרות אם צריך, ונקודות מפתח לחשיבה.
 
 כתוב בעברית. אל תצטט את הנתונים עצמם אלא התייחס אליהם.
-`;
+  `;
 
   try {
-    const configuration = new Configuration({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-    const openai = new OpenAIApi(configuration);
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    const gptResponse = await openai.createChatCompletion({
+    const gptResponse = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
         { role: 'system', content: 'אתה מומחה לקידום ממומן שנותן ניתוח חכם ללקוח' },
         { role: 'user', content: prompt }
-      ],
+      ]
     });
 
-    const reply = gptResponse.data.choices[0].message.content;
+    const reply = gptResponse.choices[0].message.content;
     res.json({ reply });
   } catch (error) {
     console.error("GPT error:", error);
