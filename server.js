@@ -10,26 +10,21 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Set up __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Enable CORS and serve static files
 app.use(cors());
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// Serve index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// OpenAI setup
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Endpoint to analyze budget
 app.post('/analyze', async (req, res) => {
   const data = req.body;
 
@@ -62,11 +57,11 @@ app.post('/analyze', async (req, res) => {
     const reply = completion.choices[0].message.content;
     res.json({ reply });
   } catch (error) {
-    console.error('GPT error:', error);
+    console.error('GPT error:', error.message);
     res.status(500).json({ error: 'Failed to get GPT response' });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });
