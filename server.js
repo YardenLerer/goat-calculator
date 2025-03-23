@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
 import OpenAI from 'openai';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -19,10 +19,6 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
 });
 
 app.post('/analyze', async (req, res) => {
@@ -46,22 +42,23 @@ app.post('/analyze', async (req, res) => {
   `;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    const chat = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
         { role: 'system', content: 'אתה מומחה לקידום ממומן שנותן ניתוח חכם ללקוח' },
-        { role: 'user', content: prompt }
+        { role: 'user', content: prompt },
       ],
     });
 
-    const reply = completion.choices[0].message.content;
-    res.json({ reply });
+    res.json({ reply: chat.choices[0].message.content });
   } catch (error) {
-    console.error('GPT error:', error.message);
+    console.error("GPT Error:", error);
     res.status(500).json({ error: 'Failed to get GPT response' });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`✅ Server is running on port ${port}`);
 });
