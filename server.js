@@ -1,11 +1,14 @@
+import OpenAI from 'openai';
 import express from 'express';
-import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,7 +16,6 @@ const port = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(cors());
 app.use(express.static(__dirname));
 app.use(express.json());
 
@@ -42,23 +44,22 @@ app.post('/analyze', async (req, res) => {
   `;
 
   try {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-    const chat = await openai.chat.completions.create({
+    const chatCompletion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
         { role: 'system', content: 'אתה מומחה לקידום ממומן שנותן ניתוח חכם ללקוח' },
-        { role: 'user', content: prompt },
+        { role: 'user', content: prompt }
       ],
     });
 
-    res.json({ reply: chat.choices[0].message.content });
+    const reply = chatCompletion.choices?.[0]?.message?.content || "לא התקבלה תגובה מהרובוט.";
+    res.json({ reply });
   } catch (error) {
-    console.error("GPT Error:", error);
-    res.status(500).json({ error: 'Failed to get GPT response' });
+    console.error('GPT Error:', error);
+    res.status(500).json({ error: 'שגיאה בקבלת תגובה מהבינה המלאכותית' });
   }
 });
 
 app.listen(port, () => {
-  console.log(`✅ Server is running on port ${port}`);
+  console.log(`🔥 GOAT Calculator Server is running on port ${port}`);
 });
