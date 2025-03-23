@@ -4,7 +4,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Configuration, OpenAIApi } from 'openai';
 import dotenv from 'dotenv';
-import cors from 'cors';
 
 dotenv.config();
 
@@ -15,9 +14,6 @@ const port = process.env.PORT || 3000;
 // Setup __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// ✅ מוסיף CORS כדי לאפשר תקשורת מהדפדפן
-app.use(cors());
 
 // Static files (כולל index.html)
 app.use(express.static(__dirname));
