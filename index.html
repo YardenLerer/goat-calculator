@@ -1,1 +1,210 @@
-<!-- Full index.html will be added here (already available in the canvas) -->
+
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מחשבון תקציב ממומן חכם - GOAT Marketing</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #f4f7fa;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    header img {
+      height: 50px;
+    }
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #444;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 25px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .insights {
+      margin-top: 15px;
+      background-color: #eaf4ff;
+      border: 1px dashed #007bff;
+      padding: 15px;
+      border-radius: 10px;
+      color: #333;
+    }
+    .ai-response {
+      margin-top: 15px;
+      background-color: #fff6e6;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      border-radius: 10px;
+      color: #4d4d4d;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>מחשבון תקציב קמפיין ממומן</h2>
+    <img src="https://i.imgur.com/oG7q1SH.png" alt="GOAT Marketing Logo">
+  </header>
+
+  <label for="goal">מה מטרת הקמפיין?</label>
+  <select id="goal">
+    <option value="leads">לידים / פניות</option>
+    <option value="sales">מכירות</option>
+    <option value="traffic">טראפיק לאתר</option>
+    <option value="awareness">חשיפה</option>
+  </select>
+
+  <label for="industry">מה התחום שלך?</label>
+  <select id="industry">
+    <option value="coach">אימון / טיפול / קואצ'ינג</option>
+    <option value="beauty">איפור / קוסמטיקה / שיער</option>
+    <option value="biz">ייעוץ עסקי / פיננסי</option>
+    <option value="realestate">נדל"ן / רכב</option>
+    <option value="store">חנות אונליין</option>
+    <option value="custom">אחר (אכניס ידנית)</option>
+  </select>
+
+  <div id="manualCPLContainer" style="display: none;">
+    <label for="manualCPL">הכנס עלות ליד משוערת (ש"ח):</label>
+    <input type="number" id="manualCPL" placeholder="לדוגמה: 40">
+  </div>
+
+  <label for="clients">כמה לידים אתה רוצה לקבל בחודש?</label>
+  <input type="number" id="clients" placeholder="לדוגמה: 50">
+
+  <label for="value">מה שווי לקוח ממוצע אצלך (בש"ח)?</label>
+  <input type="number" id="value" placeholder="לדוגמה: 450">
+
+  <label for="days">כמה ימים ירוץ הקמפיין?</label>
+  <input type="number" id="days" placeholder="לדוגמה: 30">
+
+  <button onclick="calculateSmartBudget()">חשב תקציב</button>
+  <button onclick="askGoatRobot()">💬 התייעץ עם הרובוט של GOAT</button>
+
+  <div class="result" id="result" style="display: none;"></div>
+  <div class="ai-response" id="aiResponse" style="display: none;"></div>
+
+  <script>
+    const CPL_BY_INDUSTRY = {
+      coach: 70,
+      beauty: 30,
+      biz: 100,
+      realestate: 180,
+      store: 80
+    };
+
+    document.getElementById("industry").addEventListener("change", function () {
+      const manualInput = document.getElementById("manualCPLContainer");
+      manualInput.style.display = this.value === "custom" ? "block" : "none";
+    });
+
+    let cachedData = {};
+
+    function calculateSmartBudget() {
+      const industry = document.getElementById("industry").value;
+      const manualCPL = parseFloat(document.getElementById("manualCPL").value);
+      const clients = parseInt(document.getElementById("clients").value);
+      const value = parseFloat(document.getElementById("value").value);
+      const days = parseInt(document.getElementById("days").value);
+
+      let cpl = CPL_BY_INDUSTRY[industry] || manualCPL;
+      if (!cpl || isNaN(clients) || isNaN(value) || isNaN(days) || clients <= 0 || value <= 0 || days <= 0) {
+        alert("אנא מלא את כל השדות הנדרשים בצורה תקינה.");
+        return;
+      }
+
+      const monthlyBudget = cpl * clients;
+      const dailyBudget = monthlyBudget / days;
+      const estimatedRevenue = clients * value;
+      const roas = estimatedRevenue / monthlyBudget;
+
+      cachedData = { industry, cpl, clients, value, days, monthlyBudget, dailyBudget, estimatedRevenue, roas };
+
+      const result = document.getElementById("result");
+      result.style.display = "block";
+      result.innerHTML = `
+        <strong>סיכום תקציב לקמפיין:</strong><br><br>
+        ✅ תקציב חודשי נדרש: <strong>${monthlyBudget.toLocaleString()} ש"ח</strong><br>
+        ✅ תקציב יומי: <strong>${dailyBudget.toFixed(2)} ש"ח</strong><br>
+        ✅ צפי הכנסה מוערכת: <strong>${estimatedRevenue.toLocaleString()} ש"ח</strong><br>
+        ✅ ROAS (החזר השקעה): <strong>${roas.toFixed(2)}x</strong>
+      `;
+    }
+
+    async function askGoatRobot() {
+      if (!cachedData.monthlyBudget) {
+        alert("אנא חשב קודם את התקציב ואז לחץ על כפתור ההתייעצות.");
+        return;
+      }
+
+      const responseBox = document.getElementById("aiResponse");
+      responseBox.style.display = "block";
+      responseBox.innerHTML = "⏳ שולח נתונים ל-GOAT AI...";
+
+      try {
+        const res = await fetch("https://goat-calculator-ai.onrender.com/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cachedData)
+        });
+
+        const data = await res.json();
+        if (data.reply) {
+          responseBox.innerHTML = `<strong>📊 ניתוח מבוסס בינה מלאכותית:</strong><br><br>${data.reply.replace(/\n/g, '<br>')}`;
+        } else {
+          responseBox.innerHTML = "❌ לא התקבלה תגובה מהרובוט. ודא שהשרת פעיל.";
+        }
+      } catch (error) {
+        responseBox.innerHTML = `❌ שגיאה: ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
