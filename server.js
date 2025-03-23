@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Configuration, OpenAIApi } from 'openai';
@@ -8,6 +9,7 @@ import cors from 'cors';
 dotenv.config();
 
 const app = express();
+app.use(cors());
 const port = process.env.PORT || 3000;
 
 // Setup __dirname in ES module
