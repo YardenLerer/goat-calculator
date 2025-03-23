@@ -1,30 +1,31 @@
+import OpenAI from 'openai';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Configuration, OpenAIApi } from 'openai';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Setup __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Serve static files from the root directory
 app.use(express.static(__dirname));
-
-// Parse JSON request bodies
 app.use(express.json());
 
-// Serve index.html on root
+// Serve index.html for root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// AI route
+// Handle AI analysis requests
 app.post('/analyze', async (req, res) => {
   const data = req.body;
   const prompt = `
@@ -42,15 +43,10 @@ app.post('/analyze', async (req, res) => {
 תן לי תובנות חכמות ואסטרטגיות ללקוח שמתלבט אם להשקיע בקמפיין כזה, כולל המלצות לשיפור, אזהרות אם צריך, ונקודות מפתח לחשיבה.
 
 כתוב בעברית. אל תצטט את הנתונים עצמם אלא התייחס אליהם.
-`;
+  `;
 
   try {
-    const configuration = new Configuration({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-    const openai = new OpenAIApi(configuration);
-
-    const gptResponse = await openai.createChatCompletion({
+    const chatCompletion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
         { role: 'system', content: 'אתה מומחה לקידום ממומן שנותן ניתוח חכם ללקוח' },
@@ -58,14 +54,14 @@ app.post('/analyze', async (req, res) => {
       ],
     });
 
-    const reply = gptResponse.data.choices[0].message.content;
+    const reply = chatCompletion.choices[0].message.content;
     res.json({ reply });
   } catch (error) {
-    console.error("GPT error:", error);
-    res.status(500).json({ error: 'Failed to get GPT response' });
+    console.error('GPT Error:', error);
+    res.status(500).json({ error: 'שגיאה בקבלת תגובה מהבינה המלאכותית' });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`🔥 GOAT Calculator Server is running on port ${port}`);
 });
