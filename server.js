@@ -2,31 +2,31 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import OpenAI from 'openai';
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
 const port = process.env.PORT || 3000;
 
-// Setup __dirname in ES module
+// הגדרת __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Static files
-app.use(express.static(__dirname));
-
-// JSON body parser
+// הפעלת CORS ו-parser ל-JSON
+app.use(cors());
 app.use(express.json());
 
-// שליחת הקובץ הראשי
+// שליחת קבצים סטטיים כולל index.html
+app.use(express.static(__dirname));
+
+// שליחת index.html ב-root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// נקודת גישה לרובוט
+// קריאה ל-GPT
 app.post('/analyze', async (req, res) => {
   const data = req.body;
 
@@ -45,10 +45,12 @@ app.post('/analyze', async (req, res) => {
 תן לי תובנות חכמות ואסטרטגיות ללקוח שמתלבט אם להשקיע בקמפיין כזה, כולל המלצות לשיפור, אזהרות אם צריך, ונקודות מפתח לחשיבה.
 
 כתוב בעברית. אל תצטט את הנתונים עצמם אלא התייחס אליהם.
-  `;
+`;
 
   try {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
 
     const gptResponse = await openai.chat.completions.create({
       model: 'gpt-4',
